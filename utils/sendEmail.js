@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 module.exports = async options => {
   // If we're in development and don't want to send real emails
-  if (process.env.NODE_ENV === 'development' && process.env.SEND_REAL_EMAILS === 'false') {
+  if (process.env.NODE_ENV === 'development'  && process.env.SEND_REAL_EMAILS === 'false') {
     console.log('=== EMAIL (NOT SENT - DEVELOPMENT MODE) ===');
     console.log('To:', options.email);
     console.log('Subject:', options.subject);
