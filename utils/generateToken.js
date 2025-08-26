@@ -6,10 +6,13 @@ const signToken = id => {
   });
 };
 
+ // Calculate cookie expiration based on JWT_EXPIRES_IN
+  const expiresInDays = process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 1;
+
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
  const cookieOptions = {
-  expires: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+  expires: new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000),
   httpOnly: true,
   sameSite: "lax",
 };
