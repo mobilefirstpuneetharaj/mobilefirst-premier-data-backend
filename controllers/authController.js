@@ -5,6 +5,45 @@ const { promisify } = require('util');
 const sendEmail = require('../utils/sendEmail');
 const { createSendToken } = require('../utils/generateToken');
 
+// // Register a new user
+// exports.register = async (req, res) => {
+//   try {
+//     const { firstName, lastName, email, password } = req.body;
+
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ status: 'fail', message: 'Email already in use' });
+//     }
+
+//     const newUser = await User.create({ firstName, lastName, email, password });
+
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//     await OTP.create({ email, otp });
+
+//     // Always log OTP to console for development (extremely helpful for testing)
+//     console.log(`🎯 OTP for ${email}: ${otp}`);
+//     console.log(`📧 Email would be sent to: ${email}`);
+
+//     try {
+//       await sendEmail({
+//         email: newUser.email,
+//         subject: 'Your OTP for verification',
+//         message: `Your OTP for verification is: ${otp}`
+//       });
+//       console.log('✅ OTP email sent successfully');
+//     } catch (emailError) {
+//       console.error('❌ Failed to send OTP email:', emailError.message);
+//       // Don't fail the registration - user can request a new OTP later
+//       // Continue with the registration process
+//     }
+
+//     createSendToken(newUser, 201, res);
+//   } catch (err) {
+//     console.error('Registration error:', err.message);
+//     res.status(500).json({ status: 'error', message: err.message });
+//   }
+// };
+
 // Register a new user
 exports.register = async (req, res) => {
   try {
@@ -15,26 +54,33 @@ exports.register = async (req, res) => {
       return res.status(400).json({ status: 'fail', message: 'Email already in use' });
     }
 
-    const newUser = await User.create({ firstName, lastName, email, password });
+    // Create user with isVerified: true to skip OTP verification
+    const newUser = await User.create({ 
+      firstName, 
+      lastName, 
+      email, 
+      password,
+      isVerified: true // Set to true to skip OTP verification
+    });
 
+    // Still generate OTP for password reset functionality
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await OTP.create({ email, otp });
 
-    // Always log OTP to console for development (extremely helpful for testing)
+    // Always log OTP to console for development
     console.log(`🎯 OTP for ${email}: ${otp}`);
     console.log(`📧 Email would be sent to: ${email}`);
 
+    // Send welcome email instead of OTP email
     try {
       await sendEmail({
         email: newUser.email,
-        subject: 'Your OTP for verification',
-        message: `Your OTP for verification is: ${otp}`
+        subject: 'Welcome to Premier Data',
+        message: `Welcome ${firstName} ${lastName}! Your account has been successfully created.`
       });
-      console.log('✅ OTP email sent successfully');
+      console.log('✅ Welcome email sent successfully');
     } catch (emailError) {
-      console.error('❌ Failed to send OTP email:', emailError.message);
-      // Don't fail the registration - user can request a new OTP later
-      // Continue with the registration process
+      console.error('❌ Failed to send welcome email:', emailError.message);
     }
 
     createSendToken(newUser, 201, res);
@@ -44,7 +90,34 @@ exports.register = async (req, res) => {
   }
 };
 
-// Login user
+// // Login user
+// exports.login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     if (!email || !password) {
+//       return res.status(400).json({ status: 'fail', message: 'Please provide email and password' });
+//     }
+
+//     const user = await User.findOne({ email }).select('+password');
+//     if (!user || !(await user.correctPassword(password, user.password))) {
+//       return res.status(401).json({ status: 'fail', message: 'Incorrect email or password' });
+//     }
+
+//     if (!user.isVerified) {
+//       return res.status(401).json({ 
+//         status: 'fail', 
+//         message: 'Please verify your email first. Check your inbox for OTP or request a new one.' 
+//       });
+//     }
+
+//     createSendToken(user, 200, res);
+//   } catch (err) {
+//     console.error('Login error:', err.message);
+//     res.status(500).json({ status: 'error', message: err.message });
+//   }
+// };
+
+// Login user - Remove OTP verification requirement
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -57,12 +130,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ status: 'fail', message: 'Incorrect email or password' });
     }
 
-    if (!user.isVerified) {
-      return res.status(401).json({ 
-        status: 'fail', 
-        message: 'Please verify your email first. Check your inbox for OTP or request a new one.' 
-      });
-    }
+    // REMOVED OTP verification requirement for login
+    // Users can login immediately after signup
 
     createSendToken(user, 200, res);
   } catch (err) {
