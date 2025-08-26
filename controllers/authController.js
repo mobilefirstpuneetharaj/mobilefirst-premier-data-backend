@@ -5,45 +5,6 @@ const { promisify } = require('util');
 const sendEmail = require('../utils/sendEmail');
 const { createSendToken } = require('../utils/generateToken');
 
-// // Register a new user
-// exports.register = async (req, res) => {
-//   try {
-//     const { firstName, lastName, email, password } = req.body;
-
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ status: 'fail', message: 'Email already in use' });
-//     }
-
-//     const newUser = await User.create({ firstName, lastName, email, password });
-
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-//     await OTP.create({ email, otp });
-
-//     // Always log OTP to console for development (extremely helpful for testing)
-//     console.log(`🎯 OTP for ${email}: ${otp}`);
-//     console.log(`📧 Email would be sent to: ${email}`);
-
-//     try {
-//       await sendEmail({
-//         email: newUser.email,
-//         subject: 'Your OTP for verification',
-//         message: `Your OTP for verification is: ${otp}`
-//       });
-//       console.log('✅ OTP email sent successfully');
-//     } catch (emailError) {
-//       console.error('❌ Failed to send OTP email:', emailError.message);
-//       // Don't fail the registration - user can request a new OTP later
-//       // Continue with the registration process
-//     }
-
-//     createSendToken(newUser, 201, res);
-//   } catch (err) {
-//     console.error('Registration error:', err.message);
-//     res.status(500).json({ status: 'error', message: err.message });
-//   }
-// };
-
 // Register a new user
 exports.register = async (req, res) => {
   try {
@@ -76,46 +37,35 @@ exports.register = async (req, res) => {
       await sendEmail({
         email: newUser.email,
         subject: 'Welcome to Premier Data',
-        message: `Welcome ${firstName} ${lastName}! Your account has been successfully created.`
+        message: `Welcome ${firstName} ${lastName}! Your account has been successfully created.
+        You can now login with your credentials.`
       });
       console.log('✅ Welcome email sent successfully');
     } catch (emailError) {
       console.error('❌ Failed to send welcome email:', emailError.message);
     }
 
-    createSendToken(newUser, 201, res);
+    // Send simple success response without token (frontend will redirect to login)
+    res.status(201).json({
+      status: 'success',
+      message: 'Registration successful! You can now login.',
+      data: { 
+        user: {
+          _id: newUser._id,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          email: newUser.email,
+          isVerified: newUser.isVerified
+        }
+      }
+    });
+
+    // createSendToken(newUser, 201, res);
   } catch (err) {
     console.error('Registration error:', err.message);
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
-
-// // Login user
-// exports.login = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     if (!email || !password) {
-//       return res.status(400).json({ status: 'fail', message: 'Please provide email and password' });
-//     }
-
-//     const user = await User.findOne({ email }).select('+password');
-//     if (!user || !(await user.correctPassword(password, user.password))) {
-//       return res.status(401).json({ status: 'fail', message: 'Incorrect email or password' });
-//     }
-
-//     if (!user.isVerified) {
-//       return res.status(401).json({ 
-//         status: 'fail', 
-//         message: 'Please verify your email first. Check your inbox for OTP or request a new one.' 
-//       });
-//     }
-
-//     createSendToken(user, 200, res);
-//   } catch (err) {
-//     console.error('Login error:', err.message);
-//     res.status(500).json({ status: 'error', message: err.message });
-//   }
-// };
 
 // Login user - Remove OTP verification requirement
 exports.login = async (req, res) => {
