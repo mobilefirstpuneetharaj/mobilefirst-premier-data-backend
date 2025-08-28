@@ -55,6 +55,7 @@ app.use(helmet({
 //   credentials: true
 // }));
 
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : ["http://localhost:5173"]; // fallback for development
