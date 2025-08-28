@@ -43,15 +43,30 @@ app.use(helmet({
 }));
 
 // CORS (adjust origin as needed)
+// app.use(cors({
+//   origin:[
+//     'http://localhost:5173',
+//     'https://mobilefirst-premier-data-frontend.vercel.app',
+//     'https://premier-data-frontend-fullstack-training-phase.vercel.app',
+//     'https://mobilefirst-premier-data-front-mobilefirstpuneetharajs-projects.vercel.app',
+//     'https://mobilefirst-premier-git-10f8c8-mobilefirstpuneetharajs-projects.vercel.app',
+//     'https://mobilefirst-premier-data-frontend-aird8q3t2.vercel.app'
+//   ],
+//   credentials: true
+// }));
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:5173"]; // fallback for development
+
 app.use(cors({
-  origin:[
-    'http://localhost:5173',
-    'https://mobilefirst-premier-data-frontend.vercel.app',
-    'https://premier-data-frontend-fullstack-training-phase.vercel.app',
-    'https://mobilefirst-premier-data-front-mobilefirstpuneetharajs-projects.vercel.app',
-    'https://mobilefirst-premier-git-10f8c8-mobilefirstpuneetharajs-projects.vercel.app',
-    'https://mobilefirst-premier-data-frontend-aird8q3t2.vercel.app'
-  ],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
@@ -62,7 +77,7 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// ✅ Replace express-mongo-sanitize with safe in-place sanitizer
+// Replace express-mongo-sanitize with safe in-place sanitizer
 app.use(sanitize());
 
 // Prevent XSS attacks
