@@ -44,7 +44,14 @@ app.use(helmet({
 
 // CORS (adjust origin as needed)
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin:[
+    'http://localhost:5173',
+    'https://mobilefirst-premier-data-frontend.vercel.app',
+    'https://premier-data-frontend-fullstack-training-phase.vercel.app',
+    'https://mobilefirst-premier-data-front-mobilefirstpuneetharajs-projects.vercel.app',
+    'https://mobilefirst-premier-git-10f8c8-mobilefirstpuneetharajs-projects.vercel.app',
+    'https://mobilefirst-premier-data-frontend-aird8q3t2.vercel.app'
+  ],
   credentials: true
 }));
 
