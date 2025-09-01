@@ -63,7 +63,7 @@ app.use(cors({
 //   credentials: true
 // }));
 
-app.options('*', cors());  // Enable pre-flight for all routes
+// app.options('*', cors()); 
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
