@@ -32,16 +32,6 @@ app.use(express.json({ limit: '10kb' }));
 // Cookie parser
 app.use(cookieParser());
 
-// Dev logging middleware
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
-
-// Security headers
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
-
 // // CORS (adjust origin as needed)
 app.use(cors({
   origin:[
@@ -52,7 +42,9 @@ app.use(cors({
     'https://mobilefirst-premier-git-10f8c8-mobilefirstpuneetharajs-projects.vercel.app',
     'https://mobilefirst-premier-data-frontend-julqhe4y3.vercel.app',
   ],
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ include OPTIONS
+  allowedHeaders: ["Content-Type", "Authorization"]     // ✅ allow needed headers
 }));
 
 
@@ -71,12 +63,34 @@ app.use(cors({
 //   credentials: true
 // }));
 
+app.options('*', cors());  // Enable pre-flight for all routes
+
+// Dev logging middleware
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// Security headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
 });
-app.use('/api', limiter);
+// app.use('/api', limiter);
+
+app.use('/api', (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return next(); // skip rate limiting for preflight
+  }
+  limiter(req, res, next);
+});
+
 
 // Replace express-mongo-sanitize with safe in-place sanitizer
 app.use(sanitize());
