@@ -50,7 +50,7 @@ app.use(cors({
     'https://premier-data-frontend-fullstack-training-phase.vercel.app',
     'https://mobilefirst-premier-data-front-mobilefirstpuneetharajs-projects.vercel.app',
     'https://mobilefirst-premier-git-10f8c8-mobilefirstpuneetharajs-projects.vercel.app',
-    'https://mobilefirst-premier-data-frontend-aird8q3t2.vercel.app',
+    'https://mobilefirst-premier-data-frontend-julqhe4y3.vercel.app',
   ],
   credentials: true
 }));
